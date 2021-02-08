@@ -1,6 +1,7 @@
 require "Oystercard"
 
 describe Oystercard do
+  let(:station) { double :station}
   context "when initialized" do
     it "set balance to zero" do
       expect(subject.balance).to eq 0
@@ -25,9 +26,15 @@ describe Oystercard do
   describe '#touch_in' do
     context 'when balance is less than minimum journey fare' do
       it 'raises and error' do
-        expect { subject.touch_in }.to raise_error 'Not enough money'
+        expect { subject.touch_in(station) }.to raise_error 'Not enough money'
       end
     end
+    context 'when balance is above minimum journey fare' do 
+      before { subject.top_up(20) }
+      it 'saves entry station' do 
+        expect { subject.touch_in(station) }.to change {subject.entry_station }.to (station)
+        end 
+      end 
   end
 
   describe '#touch_out' do
@@ -55,12 +62,12 @@ describe Oystercard do
 
     context 'after touching in' do
       before { subject.top_up(20) }
-      before { subject.touch_in }
+      before { subject.touch_in(station) }
       it 'changes to true' do
         expect(subject.send(:in_journey?)).to be true
       end
 
-      context 'after touching out' do
+      context 'then touching out' do
         it 'changes back to false' do
           expect(subject.send(:touch_out)).to be false
         end

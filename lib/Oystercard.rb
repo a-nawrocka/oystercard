@@ -1,6 +1,6 @@
 class Oystercard
   attr_reader :balance, :limit
-
+  attr_reader :entry_station
   MAXIMUM_LIMIT = 90
   MINIMUM_FARE = 1
 
@@ -8,6 +8,7 @@ class Oystercard
     @balance = 0
     @limit = MAXIMUM_LIMIT
     @in_journey = false
+    @entry_station = entry_station
   end
 
   def top_up(amount)
@@ -15,9 +16,10 @@ class Oystercard
     fail "#{amount} is over limit!" if over_limit?(amount)
   end
 
-  def touch_in
+  def touch_in(station)
     fail 'Not enough money' if low_balance?
     update_journey_status
+    self.entry_station = station
   end
 
   def touch_out
@@ -27,9 +29,9 @@ class Oystercard
 
   private
 
-  attr_writer :balance
+  attr_writer :balance, :entry_station
   attr_accessor :in_journey
-
+  
   alias :in_journey? :in_journey
   undef :in_journey
 
