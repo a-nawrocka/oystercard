@@ -3,6 +3,7 @@ class Oystercard
 
   MAXIMUM_LIMIT = 90
   MINIMUM_FARE = 1
+
   def initialize
     @balance = 0
     @limit = MAXIMUM_LIMIT
@@ -14,17 +15,14 @@ class Oystercard
     fail "#{amount} is over limit!" if over_limit?(amount)
   end
 
-  def deduct(amount)
-    self.balance -= amount
-  end
-
   def touch_in
     fail 'Not enough money' if low_balance?
-    self.in_journey = true
+    update_journey_status
   end
 
   def touch_out
-    self.in_journey = false
+    deduct(1)
+    update_journey_status
   end
 
   private
@@ -40,6 +38,18 @@ class Oystercard
   end
 
   def low_balance?
-    balance < MINIMUM_FARE    
+    balance < MINIMUM_FARE
+  end
+
+  def deduct(amount)
+    self.balance -= amount
+  end
+
+  def update_journey_status
+    if in_journey?
+      self.in_journey = false
+    else
+      self.in_journey = true
+    end
   end
 end
