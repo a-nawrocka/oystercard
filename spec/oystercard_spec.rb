@@ -30,4 +30,24 @@ describe Oystercard do
       end
     end
   end
+
+  describe '#in_journey?' do
+    context 'before touching in' do
+      subject { described_class.new.send(:in_journey?) }
+      it { is_expected.to be false }
+    end
+
+    context 'after touching in' do
+      before { subject.touch_in }
+      it 'changes to true' do
+        expect(subject.send(:in_journey?)).to be true
+      end
+
+      context 'after touching out' do
+        it 'changes back to false' do
+          expect(subject.send(:touch_out)).to be false
+        end
+      end
+    end
+  end
 end
