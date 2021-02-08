@@ -15,11 +15,18 @@ describe Oystercard do
     end
     context 'when amount is more than maximum limit ' do
       it 'raises an error' do
-        expect { (subject.top_up(91)) }.to raise_error "91 is over limit!"
+        expect { (subject.top_up(subject.limit + 1)) }.to raise_error "91 is over limit!"
       end
     end
   end
 
+  describe '#touch_in' do 
+    context 'when balance is less than minimum journey fare' do
+      it 'raises and error' do 
+        expect { subject.touch_in }.to raise_error 'Not enough money'
+      end
+    end
+  end 
   describe '#deduct' do
     before { subject.top_up(30) }
 
@@ -38,6 +45,7 @@ describe Oystercard do
     end
 
     context 'after touching in' do
+      before { subject.top_up(20) }
       before { subject.touch_in }
       it 'changes to true' do
         expect(subject.send(:in_journey?)).to be true
