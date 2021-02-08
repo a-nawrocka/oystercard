@@ -7,6 +7,7 @@ class Oystercard
 
   def top_up(amount)
     self.balance += amount
+    fail if amount + balance > 90
   end
 
   private
