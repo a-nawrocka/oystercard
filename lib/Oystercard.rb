@@ -3,6 +3,13 @@ class Oystercard
 
   def initialize
     @balance = 0
-  end 
+  end
 
+  def top_up(amount)
+    self.balance += amount
+  end
+
+  private
+
+  attr_writer :balance
 end
