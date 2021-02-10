@@ -1,10 +1,15 @@
 require "Oystercard"
 
 describe Oystercard do
-  let(:station) { double :station}
+  let(:entry_station) { double :station}
+  let(:exit_station) { double :station}
+ 
   context "when initialized" do
     it "set balance to zero" do
       expect(subject.balance).to eq 0
+    end
+    it 'has an empty list of journeys by default' do 
+      expect(subject.journeys).to be_empty
     end
   end
 
@@ -26,21 +31,37 @@ describe Oystercard do
   describe '#touch_in' do
     context 'when balance is less than minimum journey fare' do
       it 'raises and error' do
-        expect { subject.touch_in(station) }.to raise_error 'Not enough money'
+        expect { subject.touch_in(entry_station) }.to raise_error 'Not enough money'
       end
     end
     context 'when balance is above minimum journey fare' do 
       before { subject.top_up(20) }
       it 'saves entry station' do 
-        expect { subject.touch_in(station) }.to change {subject.entry_station }.to (station)
+        expect { subject.touch_in(entry_station) }.to change {subject.entry_station }.to (entry_station)
         end 
       end 
   end
 
   describe '#touch_out' do
     it 'deducts minimum fare from balance' do
-      expect { subject.touch_out }.to change { subject.balance }.by(-1)
+      expect { subject.touch_out(exit_station) }.to change { subject.balance }.by(-1)
     end
+    before do  
+      subject.top_up(20) 
+      subject.touch_in(entry_station) 
+    end
+
+    it 'stores exit station' do 
+      subject.touch_out(exit_station)
+      expect(subject.exit_station).to eq exit_station
+    end
+
+    let(:journey){ {entry_station: entry_station, exit_station: exit_station} }
+    it 'stores a journey' do 
+      subject.touch_out(exit_station)
+      expect(subject.journeys).to include journey
+    end
+
   end
 
   describe '#deduct' do
@@ -62,14 +83,14 @@ describe Oystercard do
 
     context 'after touching in' do
       before { subject.top_up(20) }
-      before { subject.touch_in(station) }
+      before { subject.touch_in(entry_station) }
       it 'changes to true' do
         expect(subject.send(:in_journey?)).to be true
       end
 
       context 'then touching out' do
         it 'changes back to false' do
-          expect(subject.send(:touch_out)).to be false
+          expect(subject.touch_out(exit_station)).to be false
         end
       end
     end
