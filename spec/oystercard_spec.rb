@@ -1,4 +1,5 @@
 require "Oystercard"
+require "Journey"
 
 describe Oystercard do
   let(:entry_station) { double :station}
@@ -36,10 +37,10 @@ describe Oystercard do
     end
     context 'when balance is above minimum journey fare' do 
       before { subject.top_up(20) }
-      it 'saves entry station' do 
-        expect { subject.touch_in(entry_station) }.to change {subject.entry_station }.to (entry_station)
-        end 
+      it 'starts a journey' do 
+        expect { subject.touch_in(entry_station) }.not_to raise_error 
       end 
+    end
   end
 
   describe '#touch_out' do
@@ -51,15 +52,9 @@ describe Oystercard do
       subject.touch_in(entry_station) 
     end
 
-    it 'stores exit station' do 
-      subject.touch_out(exit_station)
-      expect(subject.exit_station).to eq exit_station
-    end
-
-    let(:journey){ {entry_station: entry_station, exit_station: exit_station} }
     it 'stores a journey' do 
       subject.touch_out(exit_station)
-      expect(subject.journeys).to include journey
+      expect { subject.touch_out(exit_station) }.to change {subject.journeys.count }.by (1)
     end
 
   end
@@ -75,24 +70,4 @@ describe Oystercard do
     end
   end
 
-  describe '#in_journey?' do
-    context 'before touching in' do
-      subject { described_class.new.send(:in_journey?) }
-      it { is_expected.to be false }
-    end
-
-    context 'after touching in' do
-      before { subject.top_up(20) }
-      before { subject.touch_in(entry_station) }
-      it 'changes to true' do
-        expect(subject.send(:in_journey?)).to be true
-      end
-
-      context 'then touching out' do
-        it 'changes back to false' do
-          expect(subject.touch_out(exit_station)).to be false
-        end
-      end
-    end
-  end
 end
